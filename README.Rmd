@@ -1,0 +1,83 @@
+---
+title: 'Documentation: number of asylum-seekers 2014 by origin and destination'
+output: html_document
+---
+
+## Introduction into the Shiny App
+
+The shiny app is straight forward to use.
+Klick on a destination or origin country to include or exclude it from the 
+Sankey plot. The plot displays the number of asylum-seekers in 2014.
+Including several countries into the plot gives a direct impression of the magnitude
+of the numbers and a comparison is easily understood.
+
+
+## Origin of the data
+
+The data was downloaded from UNHCR at 11/09/2015:
+
+```{r, eval=FALSE}
+download.file("http://www.unhcr.org/statistics/2014AsylumTrends.zip", "asylum.zip")
+unzip("asylum.zip")
+```
+
+## Preprocessing and cleaning the data 
+
+The data is hidden in a excel-file with several sheets. The data was cut into
+pieces there to fit a normal page. We need to reverse it and read it in several
+steps. The country labels will be shortened.
+
+```{r, message =FALSE}
+require(XLConnect)
+require(stringr)
+wk <- loadWorkbook("2014 Asylum Trends annex tables v3.xls") 
+df1 <- readWorksheet(wk, sheet=7, startRow=5, endRow=25, colTypes = "character")[,-1]
+df2 <- readWorksheet(wk, sheet=7, startRow=27, endRow=47, colTypes = "character")[,-1]
+df3 <- readWorksheet(wk, sheet=7, startRow=49, endRow=69, colTypes = "character")[,-1]
+df <- data.frame(df1,df2,df3)
+df <- data.frame(sapply(df, function(x){str_replace_all(x,"\\.|,", "" )}))
+df <- as.matrix(sapply(df, function(x){str_replace_all(x,"\\*", "3" )}))
+class(df)<- "numeric"
+df <- data.frame(df)
+Origin <- readWorksheet(wk, sheet=7, startRow=5, endRow=25)[,1]
+Origin[1]<-"Syria"
+Origin[4]<-"Serbia/Kosovo"
+Origin[9]<-"Iran"
+Origin[11]<-"Russia"
+Origin[19]<-"El.Salvador"
+rownames(df)<-Origin
+Origin
+Destination <- colnames(df)
+Destination[5]<-"Bosnia/Hg."
+Destination[18]<-"Iceland"
+Destination[21]<-"Japan"
+Destination[23]<-"Liechtenstein"
+Destination[25]<-"Luxembourg"
+Destination[27]<-"Montenegro"
+Destination[28]<-"Netherlands"
+Destination[33]<-"Korea"
+Destination[35]<-"Serbia"
+Destination[41]<-"Macedonia"
+Destination[42]<-"Turkey"
+Destination[44]<-"United.States"
+colnames(df) <- Destination
+Destination
+df[1:6,1:6]
+```
+
+The data frame will be put in tidy form, ordered by origin and destination:
+
+```{r, message = FALSE, warning=FALSE}
+require(dplyr)
+require(tidyr)
+dg <- data.frame(Origin=Origin,df) %>% gather(Destination, Number, -Origin) %>%
+        arrange(desc(Number)) %>% filter(Number > 0)
+head(dg, 10)
+```
+
+Both versions were written down into single files:
+
+```{r, eval = FALSE}
+write.csv(data.frame(Origin=Origin, df),"asylumtable.csv", row.names = FALSE)
+write.csv(dg, "asylum.csv", row.names = FALSE)
+```
