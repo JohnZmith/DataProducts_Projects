@@ -17,6 +17,8 @@ shinyUI(fluidPage(
                     #                    choices = c("Origin", "Destination"), selected = "Origin"
                     #                ),
                     #verbatimTextOutput("out"),
+                  h3("The shiny app is straightforward to use. Klick on a destination 
+                     or origin country to include or exclude it from the Sankey plot. Explore and compare!"),
                     htmlOutput("myChart")
                 ),
                 column(2,  
