@@ -5,6 +5,9 @@ output: html_document
 
 ## Introduction into the Shiny App
 
+The shiny app can be found at:
+[https://johnzmith.shinyapps.io/ShinyApp]
+
 The shiny app is straight forward to use.
 Klick on a destination or origin country to include or exclude it from the 
 Sankey plot. The plot displays the number of asylum-seekers in 2014.
@@ -16,7 +19,7 @@ of the numbers and a comparison is easily understood.
 
 The data was downloaded from UNHCR at 11/09/2015:
 
-```{r, eval=FALSE}
+```{r}
 download.file("http://www.unhcr.org/statistics/2014AsylumTrends.zip", "asylum.zip")
 unzip("asylum.zip")
 ```
